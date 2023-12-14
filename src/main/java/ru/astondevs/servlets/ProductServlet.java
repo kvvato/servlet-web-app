@@ -111,7 +111,7 @@ public class ProductServlet extends HttpServlet {
         return service.getAll();
     }
 
-    private void fillResponse(HttpServletResponse resp, String body) throws IOException{
+    private void fillResponse(HttpServletResponse resp, String body) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         PrintWriter out = resp.getWriter();
