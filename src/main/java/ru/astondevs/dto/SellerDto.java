@@ -1,6 +1,7 @@
 package ru.astondevs.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,21 +12,21 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductDTO {
+@Builder
+public class SellerDto {
     private long id;
     private String name;
-    private double price;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProductDTO that = (ProductDTO) o;
-        return id == that.id && Double.compare(that.price, price) == 0 && Objects.equals(name, that.name);
+        SellerDto sellerDto = (SellerDto) o;
+        return id == sellerDto.id && Objects.equals(name, sellerDto.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, price);
+        return Objects.hash(id, name);
     }
 }

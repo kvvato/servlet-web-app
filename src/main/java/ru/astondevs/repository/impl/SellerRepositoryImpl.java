@@ -1,5 +1,7 @@
 package ru.astondevs.repository.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.astondevs.entity.Seller;
 import ru.astondevs.util.DbConnector;
 import ru.astondevs.repository.SellerRepository;
@@ -12,23 +14,31 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.astondevs.repository.RepositoryUtils.ID_COLUMN;
+
 
 public class SellerRepositoryImpl implements SellerRepository {
+    private static final String ADD_QUERY = "INSERT INTO seller(name) VALUES(?)";
+    private static final String FIND_ALL_QUERY = "SELECT * FROM seller";
+    private static final String FIND_BY_ID_QUERY = String.format("SELECT * FROM seller WHERE %s = ?", ID_COLUMN);
+    private static final String UPDATE_QUERY = String.format("UPDATE seller SET name = ? WHERE %s = ?", ID_COLUMN);
+    private static final String DELETE_QUERY = String.format("DELETE FROM seller WHERE %s = ?", ID_COLUMN);
+
     private final DbConnector connector;
+    private final Logger logger = LoggerFactory.getLogger(SellerRepositoryImpl.class);
+
+    public SellerRepositoryImpl() {
+        connector = new DbConnector();
+    }
 
     public SellerRepositoryImpl(DbConnector connector) {
         this.connector = connector;
     }
 
     @Override
-    public long add(Seller seller) {
-        String SQL = "INSERT INTO seller(name) VALUES(?)";
-
-        long id = 0;
-
+    public Seller add(Seller seller) {
         try (Connection conn = connector.connect();
-             PreparedStatement pstmt = conn.prepareStatement(SQL,
-                     Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement pstmt = conn.prepareStatement(ADD_QUERY, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, seller.getName());
 
@@ -36,25 +46,24 @@ public class SellerRepositoryImpl implements SellerRepository {
             if (affectedRows > 0) {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        id = rs.getLong(1);
+                        long id = rs.getLong(1);
+                        seller.setId(id);
+                        return seller;
                     }
-                } catch (SQLException ex) {
-                    System.out.println(ex.getMessage());
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            logger.error("Seller creation error", ex);
         }
-        return id;
+        return null;
     }
 
     @Override
     public Seller findById(long id) {
         Seller seller = null;
-        String SQL = "SELECT * FROM seller WHERE id = ?";
 
         try (Connection conn = connector.connect();
-             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+             PreparedStatement pstmt = conn.prepareStatement(FIND_BY_ID_QUERY)) {
 
             pstmt.setLong(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -62,7 +71,7 @@ public class SellerRepositoryImpl implements SellerRepository {
                 seller = resultSetToCashier(rs);
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            logger.error("Seller request error", ex);
         }
 
         return seller;
@@ -71,17 +80,16 @@ public class SellerRepositoryImpl implements SellerRepository {
     @Override
     public List<Seller> findAll() {
         List<Seller> list = new ArrayList<>();
-        String SQL = "SELECT * FROM seller";
 
         try (Connection conn = connector.connect();
-             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+             PreparedStatement pstmt = conn.prepareStatement(FIND_ALL_QUERY)) {
 
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 list.add(resultSetToCashier(rs));
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            logger.error("All sellers request error", ex);
         }
 
         return list;
@@ -89,10 +97,8 @@ public class SellerRepositoryImpl implements SellerRepository {
 
     @Override
     public void update(Seller product) throws SQLException {
-        String SQL = "UPDATE seller SET name = ? WHERE id = ?";
-
         try (Connection conn = connector.connect();
-             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE_QUERY)) {
 
             pstmt.setString(1, product.getName());
             pstmt.setLong(2, product.getId());
@@ -102,10 +108,8 @@ public class SellerRepositoryImpl implements SellerRepository {
 
     @Override
     public void delete(long id) throws SQLException {
-        String SQL = "DELETE FROM seller WHERE id = ?";
-
         try (Connection conn = connector.connect();
-             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+             PreparedStatement pstmt = conn.prepareStatement(DELETE_QUERY)) {
 
             pstmt.setLong(1, id);
             pstmt.executeUpdate();
@@ -114,7 +118,7 @@ public class SellerRepositoryImpl implements SellerRepository {
 
     private Seller resultSetToCashier(ResultSet rs) throws SQLException {
         Seller seller = new Seller();
-        seller.setId(rs.getLong("id"));
+        seller.setId(rs.getLong(ID_COLUMN));
         seller.setName(rs.getString("name"));
         return seller;
     }

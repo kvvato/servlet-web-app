@@ -1,10 +1,10 @@
 package ru.astondevs.mapper;
 
-import ru.astondevs.dto.SellerDTO;
+import ru.astondevs.dto.SellerDto;
 import ru.astondevs.entity.Seller;
 
 public interface SellerMapper {
-    SellerDTO toDto(Seller seller);
+    SellerDto toDto(Seller seller);
 
-    Seller toEntity(SellerDTO sellerDto);
+    Seller fromDto(SellerDto sellerDto);
 }

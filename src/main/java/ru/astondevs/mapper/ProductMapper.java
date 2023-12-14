@@ -1,10 +1,10 @@
 package ru.astondevs.mapper;
 
-import ru.astondevs.dto.ProductDTO;
+import ru.astondevs.dto.ProductDto;
 import ru.astondevs.entity.Product;
 
 public interface ProductMapper {
-    ProductDTO toDto(Product product);
+    ProductDto toDto(Product product);
 
-    Product toEntity(ProductDTO productDto);
+    Product fromDto(ProductDto productDto);
 }

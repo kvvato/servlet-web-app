@@ -1,17 +1,23 @@
 package ru.astondevs.mapper.impl;
 
-import ru.astondevs.dto.SellerDTO;
+import ru.astondevs.dto.SellerDto;
 import ru.astondevs.entity.Seller;
 import ru.astondevs.mapper.SellerMapper;
 
 public class SellerMapperImpl implements SellerMapper {
     @Override
-    public SellerDTO toDto(Seller seller) {
-        return new SellerDTO(seller.getId(), seller.getName());
+    public SellerDto toDto(Seller seller) {
+        return SellerDto.builder()
+                .id(seller.getId())
+                .name(seller.getName())
+                .build();
     }
 
     @Override
-    public Seller toEntity(SellerDTO sellerDto) {
-        return new Seller(sellerDto.getId(), sellerDto.getName());
+    public Seller fromDto(SellerDto sellerDto) {
+        return Seller.builder()
+                .id(sellerDto.getId())
+                .name(sellerDto.getName())
+                .build();
     }
 }

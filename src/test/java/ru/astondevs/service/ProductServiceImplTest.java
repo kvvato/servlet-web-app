@@ -5,10 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.astondevs.dto.ProductDTO;
-import ru.astondevs.entity.Product;
-import ru.astondevs.mapper.ProductMapper;
-import ru.astondevs.mapper.impl.ProductMapperImpl;
 import ru.astondevs.repository.impl.ProductRepositoryImpl;
 import ru.astondevs.service.impl.ProductServiceImpl;
 
@@ -19,44 +15,43 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.astondevs.TestUtils.PRODUCT;
+import static ru.astondevs.TestUtils.PRODUCT_DTO;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductServiceImplTest {
+class ProductServiceImplTest {
     @Mock
     private ProductRepositoryImpl repository;
 
-    private final ProductMapper mapper = new ProductMapperImpl();
-    private final Product product = new Product(1L, "Ручка", 20.0);
-    private final ProductDTO productDTO = new ProductDTO(1L, "Ручка", 20.0);
     private ProductService service;
 
     @BeforeEach
     void init() {
-        service = new ProductServiceImpl(repository, mapper);
+        service = new ProductServiceImpl(repository);
     }
 
     @Test
     void testAdd() {
-        when(repository.add(product)).thenReturn(1L);
-        assertEquals(productDTO, service.add(productDTO));
+        when(repository.add(PRODUCT)).thenReturn(PRODUCT);
+        assertEquals(PRODUCT_DTO, service.add(PRODUCT_DTO));
     }
 
     @Test
     void testGetAll() {
-        when(repository.findAll()).thenReturn(List.of(product));
-        assertEquals(List.of(productDTO), service.getAll());
+        when(repository.findAll()).thenReturn(List.of(PRODUCT));
+        assertEquals(List.of(PRODUCT_DTO), service.getAll());
     }
 
     @Test
     void testGetById() {
-        when(repository.findById(anyLong())).thenReturn(product);
-        assertEquals(productDTO, service.get(1L));
+        when(repository.findById(anyLong())).thenReturn(PRODUCT);
+        assertEquals(PRODUCT_DTO, service.get(1L));
     }
 
     @Test
     void testUpdate() throws SQLException {
-        service.update(productDTO);
-        verify(repository).update(product);
+        service.update(PRODUCT_DTO);
+        verify(repository).update(PRODUCT);
     }
 
     @Test

@@ -1,12 +1,7 @@
 package ru.astondevs.servlets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ru.astondevs.dto.SellerDTO;
-import ru.astondevs.mapper.SellerMapper;
-import ru.astondevs.mapper.impl.SellerMapperImpl;
-import ru.astondevs.repository.SellerRepository;
-import ru.astondevs.util.DbConnector;
-import ru.astondevs.repository.impl.SellerRepositoryImpl;
+import ru.astondevs.dto.SellerDto;
 import ru.astondevs.service.SellerService;
 import ru.astondevs.service.impl.SellerServiceImpl;
 
@@ -22,14 +17,7 @@ import java.util.List;
 
 @WebServlet(urlPatterns = "/seller/*")
 public class SellerServlet extends HttpServlet {
-    SellerService service;
-
-    public SellerServlet() {
-        DbConnector connector = new DbConnector();
-        SellerRepository repository = new SellerRepositoryImpl(connector);
-        SellerMapper mapper = new SellerMapperImpl();
-        service = new SellerServiceImpl(repository, mapper);
-    }
+    private final SellerService service = new SellerServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -38,10 +26,10 @@ public class SellerServlet extends HttpServlet {
 
         Long id = getPathId(req);
         if (id == null) {
-            List<SellerDTO> list = service.getAll();
+            List<SellerDto> list = service.getAll();
             json = mapper.writeValueAsString(list);
         } else {
-            SellerDTO cashier = service.get(id);
+            SellerDto cashier = service.get(id);
             if (cashier == null) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -55,8 +43,8 @@ public class SellerServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ObjectMapper mapper = new ObjectMapper();
-        SellerDTO seller = mapper.readValue(req.getReader(), SellerDTO.class);
-        service.add(seller);
+        SellerDto seller = mapper.readValue(req.getReader(), SellerDto.class);
+        seller = service.add(seller);
         String json = mapper.writeValueAsString(seller);
         fillResponse(resp, json);
     }
@@ -70,7 +58,7 @@ public class SellerServlet extends HttpServlet {
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        SellerDTO cashier = mapper.readValue(req.getReader(), SellerDTO.class);
+        SellerDto cashier = mapper.readValue(req.getReader(), SellerDto.class);
         cashier.setId(id);
 
         try {

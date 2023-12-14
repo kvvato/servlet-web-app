@@ -1,17 +1,25 @@
 package ru.astondevs.mapper.impl;
 
-import ru.astondevs.dto.ProductDTO;
+import ru.astondevs.dto.ProductDto;
 import ru.astondevs.entity.Product;
 import ru.astondevs.mapper.ProductMapper;
 
 public class ProductMapperImpl implements ProductMapper {
     @Override
-    public ProductDTO toDto(Product product) {
-        return new ProductDTO(product.getId(), product.getName(), product.getPrice());
+    public ProductDto toDto(Product product) {
+        return ProductDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .price(product.getPrice())
+                .build();
     }
 
     @Override
-    public Product toEntity(ProductDTO productDto){
-        return new Product(productDto.getId(), productDto.getName(), productDto.getPrice());
+    public Product fromDto(ProductDto productDto){
+        return Product.builder()
+                .id(productDto.getId())
+                .name(productDto.getName())
+                .price(productDto.getPrice())
+                .build();
     }
 }

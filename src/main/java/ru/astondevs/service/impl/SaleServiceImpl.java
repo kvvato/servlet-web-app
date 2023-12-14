@@ -1,8 +1,11 @@
 package ru.astondevs.service.impl;
 
-import ru.astondevs.dto.SaleDTO;
+import ru.astondevs.dto.SaleDto;
+import ru.astondevs.entity.Sale;
 import ru.astondevs.mapper.SaleMapper;
+import ru.astondevs.mapper.impl.SaleMapperImpl;
 import ru.astondevs.repository.SaleRepository;
+import ru.astondevs.repository.impl.SaleRepositoryImpl;
 import ru.astondevs.service.SaleService;
 
 import java.sql.SQLException;
@@ -10,43 +13,46 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SaleServiceImpl implements SaleService {
+    private final SaleMapper mapper = new SaleMapperImpl();
     private final SaleRepository repository;
-    private final SaleMapper mapper;
 
-    public SaleServiceImpl(SaleRepository repository, SaleMapper mapper) {
+    public SaleServiceImpl() {
+        repository = new SaleRepositoryImpl();
+    }
+
+    public SaleServiceImpl(SaleRepository repository) {
         this.repository = repository;
-        this.mapper = mapper;
     }
 
     @Override
-    public SaleDTO add(SaleDTO sale) {
-        long id = repository.add(mapper.toEntity(sale));
-        sale.setId(id);
-        return sale;
+    public SaleDto add(SaleDto saleDto) {
+        Sale sale = mapper.fromDto(saleDto);
+        sale = repository.add(sale);
+        return mapper.toDto(sale);
     }
 
     @Override
-    public SaleDTO get(long id) {
+    public SaleDto get(long id) {
         return mapper.toDto(repository.findById(id));
     }
 
     @Override
-    public List<SaleDTO> getAll() {
+    public List<SaleDto> getAll() {
         return repository.findAll().stream()
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<SaleDTO> getBySeller(long sellerId) {
-        return repository.findSalesBySeller(sellerId).stream()
+    public List<SaleDto> getBySellerId(long sellerId) {
+        return repository.findSalesBySellerId(sellerId).stream()
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void update(SaleDTO sale) throws SQLException {
-        repository.update(mapper.toEntity(sale));
+    public void update(SaleDto sale) throws SQLException {
+        repository.update(mapper.fromDto(sale));
     }
 
     @Override

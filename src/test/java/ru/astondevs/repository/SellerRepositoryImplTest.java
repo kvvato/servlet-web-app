@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.astondevs.entity.Seller;
 import ru.astondevs.repository.impl.SellerRepositoryImpl;
 import ru.astondevs.util.DbConnector;
 
@@ -21,9 +20,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.astondevs.TestUtils.SELLER;
 
 @ExtendWith(MockitoExtension.class)
-public class SellerRepositoryImplTest {
+class SellerRepositoryImplTest {
     @Mock
     private DbConnector dbConnector;
     @Mock
@@ -34,7 +34,6 @@ public class SellerRepositoryImplTest {
     private ResultSet resultSet;
 
     private SellerRepositoryImpl sellerRepository;
-    private final Seller seller = new Seller(1L, "Иван");
 
     @BeforeEach
     void init() {
@@ -49,9 +48,9 @@ public class SellerRepositoryImplTest {
         when(statement.getGeneratedKeys()).thenReturn(resultSet);
         when(statement.executeUpdate()).thenReturn(1);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
-        when(resultSet.getLong(1)).thenReturn(1L);
+        when(resultSet.getLong(1)).thenReturn(SELLER.getId());
 
-        assertEquals(seller.getId(), sellerRepository.add(seller));
+        assertEquals(SELLER.getId(), sellerRepository.add(SELLER));
     }
 
     @Test
@@ -59,10 +58,10 @@ public class SellerRepositoryImplTest {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
         when(statement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
-        when(resultSet.getLong("id")).thenReturn(1L);
-        when(resultSet.getString("name")).thenReturn("Иван");
+        when(resultSet.getLong("id")).thenReturn(SELLER.getId());
+        when(resultSet.getString("name")).thenReturn(SELLER.getName());
 
-        assertEquals(List.of(seller), sellerRepository.findAll());
+        assertEquals(List.of(SELLER), sellerRepository.findAll());
     }
 
     @Test
@@ -70,19 +69,19 @@ public class SellerRepositoryImplTest {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
         when(statement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
-        when(resultSet.getLong("id")).thenReturn(1L);
-        when(resultSet.getString("name")).thenReturn("Иван");
+        when(resultSet.getLong("id")).thenReturn(SELLER.getId());
+        when(resultSet.getString("name")).thenReturn(SELLER.getName());
 
-        assertEquals(seller, sellerRepository.findById(1L));
+        assertEquals(SELLER, sellerRepository.findById(1L));
     }
 
     @Test
     void testUpdate() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
 
-        sellerRepository.update(seller);
+        sellerRepository.update(SELLER);
 
-        verify(statement).setString(1, "Иван");
+        verify(statement).setString(1, SELLER.getName());
         verify(statement).executeUpdate();
     }
 
@@ -90,9 +89,9 @@ public class SellerRepositoryImplTest {
     void testDelete() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
 
-        sellerRepository.delete(1L);
+        sellerRepository.delete(SELLER.getId());
 
-        verify(statement).setLong(1, 1L);
+        verify(statement).setLong(1, SELLER.getId());
         verify(statement).executeUpdate();
     }
 }

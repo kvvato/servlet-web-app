@@ -1,12 +1,7 @@
 package ru.astondevs.servlets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ru.astondevs.dto.SaleDTO;
-import ru.astondevs.mapper.SaleMapper;
-import ru.astondevs.mapper.impl.SaleMapperImpl;
-import ru.astondevs.repository.SaleRepository;
-import ru.astondevs.util.DbConnector;
-import ru.astondevs.repository.impl.SaleRepositoryImpl;
+import ru.astondevs.dto.SaleDto;
 import ru.astondevs.service.SaleService;
 import ru.astondevs.service.impl.SaleServiceImpl;
 
@@ -22,14 +17,7 @@ import java.util.List;
 
 @WebServlet(urlPatterns = "/sale/*")
 public class SaleServlet extends HttpServlet {
-    SaleService service;
-
-    public SaleServlet() {
-        DbConnector connector = new DbConnector();
-        SaleRepository repository = new SaleRepositoryImpl(connector);
-        SaleMapper mapper = new SaleMapperImpl();
-        service = new SaleServiceImpl(repository, mapper);
-    }
+    private final SaleService service = new SaleServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -39,10 +27,10 @@ public class SaleServlet extends HttpServlet {
         try {
             Long id = getPathId(req);
             if (id == null) {
-                List<SaleDTO> list = getSales(req);
+                List<SaleDto> list = getSales(req);
                 json = mapper.writeValueAsString(list);
             } else {
-                SaleDTO sale = service.get(id);
+                SaleDto sale = service.get(id);
                 if (sale == null) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
@@ -60,8 +48,8 @@ public class SaleServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ObjectMapper mapper = new ObjectMapper();
-        SaleDTO sale = mapper.readValue(req.getReader(), SaleDTO.class);
-        service.add(sale);
+        SaleDto sale = mapper.readValue(req.getReader(), SaleDto.class);
+        sale = service.add(sale);
         String json = mapper.writeValueAsString(sale);
         fillResponse(resp, json);
     }
@@ -75,7 +63,7 @@ public class SaleServlet extends HttpServlet {
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        SaleDTO sale = mapper.readValue(req.getReader(), SaleDTO.class);
+        SaleDto sale = mapper.readValue(req.getReader(), SaleDto.class);
         sale.setId(id);
 
         try {
@@ -115,10 +103,10 @@ public class SaleServlet extends HttpServlet {
         return id;
     }
 
-    private List<SaleDTO> getSales(HttpServletRequest req) throws NumberFormatException {
+    private List<SaleDto> getSales(HttpServletRequest req) throws NumberFormatException {
         String seller = req.getParameter("seller");
         if (seller != null) {
-            return service.getBySeller(Long.parseLong(seller));
+            return service.getBySellerId(Long.parseLong(seller));
         }
         return service.getAll();
     }

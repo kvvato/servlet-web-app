@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.astondevs.entity.Product;
 import ru.astondevs.repository.impl.ProductRepositoryImpl;
 import ru.astondevs.util.DbConnector;
 
@@ -21,9 +20,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.astondevs.TestUtils.PRODUCT;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductRepositoryImplTest {
+class ProductRepositoryImplTest {
     @Mock
     private DbConnector dbConnector;
     @Mock
@@ -34,7 +34,6 @@ public class ProductRepositoryImplTest {
     private ResultSet resultSet;
 
     private ProductRepositoryImpl productRepository;
-    private final Product product = new Product(1L, "Ручка", 20.0);
 
     @BeforeEach
     void init() {
@@ -49,9 +48,9 @@ public class ProductRepositoryImplTest {
         when(statement.getGeneratedKeys()).thenReturn(resultSet);
         when(statement.executeUpdate()).thenReturn(1);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
-        when(resultSet.getLong(1)).thenReturn(1L);
+        when(resultSet.getLong(1)).thenReturn(PRODUCT.getId());
 
-        assertEquals(product.getId(), productRepository.add(product));
+        assertEquals(PRODUCT, productRepository.add(PRODUCT));
     }
 
     @Test
@@ -59,11 +58,11 @@ public class ProductRepositoryImplTest {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
         when(statement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
-        when(resultSet.getLong("id")).thenReturn(1L);
-        when(resultSet.getString("name")).thenReturn("Ручка");
-        when(resultSet.getDouble("price")).thenReturn(20.0);
+        when(resultSet.getLong("id")).thenReturn(PRODUCT.getId());
+        when(resultSet.getString("name")).thenReturn(PRODUCT.getName());
+        when(resultSet.getBigDecimal("price")).thenReturn(PRODUCT.getPrice());
 
-        assertEquals(List.of(product), productRepository.findAll());
+        assertEquals(List.of(PRODUCT), productRepository.findAll());
     }
 
     @Test
@@ -71,21 +70,21 @@ public class ProductRepositoryImplTest {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
         when(statement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
-        when(resultSet.getLong("id")).thenReturn(1L);
-        when(resultSet.getString("name")).thenReturn("Ручка");
-        when(resultSet.getDouble("price")).thenReturn(20.0);
+        when(resultSet.getLong("id")).thenReturn(PRODUCT.getId());
+        when(resultSet.getString("name")).thenReturn(PRODUCT.getName());
+        when(resultSet.getBigDecimal("price")).thenReturn(PRODUCT.getPrice());
 
-        assertEquals(product, productRepository.findById(1L));
+        assertEquals(PRODUCT, productRepository.findById(1L));
     }
 
     @Test
     void testUpdate() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
 
-        productRepository.update(product);
+        productRepository.update(PRODUCT);
 
-        verify(statement).setString(1, "Ручка");
-        verify(statement).setDouble(2, 20.0);
+        verify(statement).setString(1, PRODUCT.getName());
+        verify(statement).setBigDecimal(2, PRODUCT.getPrice());
         verify(statement).executeUpdate();
     }
 
@@ -93,9 +92,9 @@ public class ProductRepositoryImplTest {
     void testDelete() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
 
-        productRepository.delete(1L);
+        productRepository.delete(PRODUCT.getId());
 
-        verify(statement).setLong(1, 1L);
+        verify(statement).setLong(1, PRODUCT.getId());
         verify(statement).executeUpdate();
     }
 }
